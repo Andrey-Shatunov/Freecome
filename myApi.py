@@ -19,7 +19,6 @@ def put_document():
     if '_id' not in entity:
         abort(400, 'No _id specified')
     try:
-       #coll.update({"name": "Петр"}, {"surname": "Новосельцев", "age": 25})
        db['income'].update({"_id": entity['_id']}, {"name": entity['name']})
        
        print(entity['_id'])
