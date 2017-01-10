@@ -2,7 +2,8 @@ import json
 #import bottle
 from bottle import route, run, request, abort
 from pymongo import Connection
- 
+from bson.json_util import dumps
+
 connection = Connection('localhost', 27017)
 db = connection.mydatabase
  
@@ -24,7 +25,7 @@ def put_document():
        print(entity['_id'])
     except ValidationError as ve:
         abort(400, str(ve))
-        
+#********************************************POST*************************************************        
 @route('/income', method='POST')
 def post_document():
     data = request.body.readline().decode('utf8')
@@ -46,7 +47,7 @@ def get_all_income():
     entity = db['income'].find()
     for i in entity:
         print(i)
-    print(entity)
+    print(dumps(entity))
     if not entity:
         abort(404, 'DB is empty')
     return entity
@@ -68,7 +69,7 @@ def get_income_for_user(id):
     if not entity:
         abort(404, 'No document with id %s' % id)
     return entity
-    
+#********************************************DELETE*************************************************    
 @route('/income/:id_income', method='DELETE')
 def delete_income(id):
     entity = db['income'].remove({'_id_income':id})
@@ -77,4 +78,12 @@ def delete_income(id):
     result = db['income'].remove({'_id_income':id})
     return result
  
+@route('/income/all/', method='DELETE')
+def delete_income_all():
+    try:
+        entity = db['income'].remove({})
+    except:
+        print ('error/exception')
+    return entity
+    
 run(host='localhost', port=8080)
