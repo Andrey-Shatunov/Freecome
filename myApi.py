@@ -94,12 +94,9 @@ def put_expenditure():
     #print(entity)
     if '_id' not in entity:
         abort(400, 'No _id specified')
-    try:
-       db['expenditure'].update({"_id": entity['_id']}, {"$set":{"note": entity['note']}})
+    db['expenditure'].update({"_id": entity['_id']}, {"$set":{"note": entity['note']}})
        
-       print(entity['_id'])
-    except ValidationError as ve:
-        abort(400, str(ve))
+
 #********************************************POST*************************************************        
 @route('/expenditure', method='POST')
 def post_expenditure():
