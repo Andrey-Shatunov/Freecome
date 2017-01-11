@@ -3,6 +3,7 @@ import json
 from bottle import route, run, request, abort
 from pymongo import Connection
 from bson.json_util import dumps
+from income_to import entity_to_str
 
 connection = Connection('localhost', 27017)
 db = connection.mydatabase
@@ -19,7 +20,7 @@ def put_document():
     if '_id' not in entity:
         abort(400, 'No _id specified')
     try:
-       db['income'].update({"_id": entity['_id']}, {"name": entity['name']})
+       db['income'].update({"_id": entity['_id']}, {"$set":{"note": entity['note']}})
        
        print(entity['_id'])
     except ValidationError as ve:
@@ -31,11 +32,11 @@ def post_document():
     if not data:
         abort(400, 'No data received')
     entity = json.loads(data)
-    #print(entity)
+    print(entity)
     if '_id' not in entity:
         abort(400, 'No _id specified')
- #   if '_id_income' not in entity:
-  #      abort(400, 'No _id_income specified')
+ #   if '_id_user' not in entity:
+  #      abort(400, 'No _id_user specified')
     try:
         db['income'].save(entity)
     except ValidationError as ve:
@@ -44,38 +45,41 @@ def post_document():
 @route('/income', method='GET')
 def get_all_income():
     entity = db['income'].find()
-    for i in entity:
-        print(i)
-    print(dumps(entity))
+    #
+    #****
+    #
+    #print(json.dumps(str1))
+    str1=entity_to_str(entity)
+    print(str1)
     if not entity:
         abort(404, 'DB is empty')
-    return entity
+    return str1
 
-#get income for _id_income   
+#get income for _id_user   
 @route('/income/:id', method='GET')
 def get_income(id):
-    entity = db['income'].find_one({'_id_income':id})
+    entity = db['income'].find_one({'_id': id})
     print(entity)
     if not entity:
         abort(404, 'No document with id %s' % id)
     return entity
 
 #get user for id    
-@route('/income/user/:id_user', method='GET')
+@route('/income/user/:id', method='GET')
 def get_income_for_user(id):
-    entity = db['income'].find_one({'_id':id})
+    entity = db['income'].find_one({'_id_user':id})
     print(entity)
     if not entity:
         abort(404, 'No document with id %s' % id)
     return entity
 #********************************************DELETE*************************************************    
-@route('/income/:id_income', method='DELETE')
+@route('/income/:id', method='DELETE')
 def delete_income(id):
-    entity = db['income'].remove({'_id_income':id})
+    entity = db['income'].remove({'_id':id})
     if not entity:
         abort(404, 'No document with id_income %s' % id)
-    result = db['income'].remove({'_id_income':id})
-    return result
+    #result = db['income'].remove({'_id_user':id})
+    return entity
  
 @route('/income/all/', method='DELETE')
 def delete_income_all():
