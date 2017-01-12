@@ -1,8 +1,10 @@
 import json
-import bottle
+import bson
+#import bottle
 from bottle import route, run, request, abort
 from pymongo import Connection
-from bson.json_util import dumps
+import pymongo
+#from bson.json_util import dumps
 from income_to import entity_to_str
 from bson.objectid import ObjectId
 
@@ -14,25 +16,41 @@ class JSONEncoder(json.JSONEncoder):
         if isinstance(o, ObjectId):
             return str(o)
         return json.JSONEncoder.default(self, o)
-
+###
 #entity = db['documents'].find_one({'_id':'doc1'})
 #print(entity)
+
 #********************************************PUT************************************************* 
 @route('/income', method='PUT')
 def put_document():
     data = request.body.readline().decode('utf8')
+    lwist1=['id_user','sum','category','note','data']
     if not data:
         abort(400, 'No data received')
     entity = json.loads(data)
-    #print(entity)
     if '_id' not in entity:
         abort(400, 'No _id specified')
+        
+    list_key=list(entity.keys())
+    
+    if len(list_key) > 2:
+        abort(400, 'Many parametr')
+        
+    
+    
+    print("list_key"+str(list_key))
+    print(lwist1.count(list_key[0]))
+    
+    list_key.remove('_id')
+    print("list_key"+str(list_key))
+    if lwist1.count(list_key[0]) == 0:
+        abort(400, 'Wrong parametr')
     try:
-       db['income'].update({"_id": entity['_id']}, {"$set":{"note": entity['note']}})
-       
-       print(entity['_id'])
-    except ValidationError as ve:
-        abort(400, str(ve))
+        print(entity.keys())
+        result=db['income'].update({"_id": ObjectId(entity['_id'])}, {"$set":{list_key[0]: entity[list_key[0]]}})
+    except bson.errors.BSONError:
+        abort(400, '_id is wrong')
+    return result
 #********************************************POST*************************************************        
 @route('/income', method='POST')
 def post_document():
@@ -41,13 +59,13 @@ def post_document():
         abort(400, 'No data received')
     entity = json.loads(data)
     print(entity)
-    #if '_id' not in entity:
-    #    abort(400, 'No _id specified')
+    if '_id' in entity:
+        abort(400, 'Id generate auto')
  #   if '_id_user' not in entity:
   #      abort(400, 'No _id_user specified')
     try:
         db['income'].save(entity)
-    except ValidationError as ve:
+    except pymongo.errors.WriteError as ve:
         abort(400, str(ve))
 #********************************************GET*************************************************       
 @route('/income', method='GET')
@@ -103,7 +121,15 @@ def put_expenditure():
     #print(entity)
     if '_id' not in entity:
         abort(400, 'No _id specified')
-    db['expenditure'].update({"_id": entity['_id']}, {"$set":{"note": entity['note']}})
+    try:
+       print(list(entity.keys()))
+       aaa=str(list(entity.keys())[1])
+       result=db['expenditure'].update({"_id": ObjectId(entity['_id'])}, {"$set":{list(entity.keys())[1]: entity[list(entity.keys())[1]]}})
+       
+       print(result)
+    except pymongo.errors.WriteError as ve:
+        abort(400, str(ve))
+    return result
        
 
 #********************************************POST*************************************************        
@@ -114,13 +140,13 @@ def post_expenditure():
         abort(400, 'No data received')
     entity = json.loads(data)
     print(entity)
-    if '_id' not in entity:
-        abort(400, 'No _id specified')
+    #if '_id' not in entity:
+    #    abort(400, 'No _id specified')
  #   if '_id_user' not in entity:
   #      abort(400, 'No _id_user specified')
     try:
         db['expenditure'].save(entity)
-    except ValidationError as ve:
+    except pymongo.errors.WriteError as ve:
         abort(400, str(ve))
 #********************************************GET*************************************************       
 @route('/expenditure', method='GET')
@@ -128,7 +154,9 @@ def get_all_expenditure():
     entity = db['expenditure'].find()
     if not entity:
         abort(404, 'DB is empty')
-    return entity_to_str(entity)
+    #print(json.loads("{\"1\":\"2\"}"))
+    return json.loads(entity_to_str(entity))
+
 
 #get expenditure for _id_user   
 @route('/expenditure/:id', method='GET')
@@ -163,7 +191,8 @@ def delete_expenditure_all():
     except:
         print ('error/exception')
     return entity
-    
+
+
 run(host='localhost', port=8080)
 #application = bottle.default_app()
 #from paste import httpserver
