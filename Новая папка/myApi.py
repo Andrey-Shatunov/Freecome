@@ -1,20 +1,13 @@
 import json
-import bottle
+#import bottle
 from bottle import route, run, request, abort
 from pymongo import Connection
 from bson.json_util import dumps
 from income_to import entity_to_str
-from bson.objectid import ObjectId
 
 connection = Connection('localhost', 27017)
 db = connection.mydatabase
-
-class JSONEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, ObjectId):
-            return str(o)
-        return json.JSONEncoder.default(self, o)
-
+ 
 #entity = db['documents'].find_one({'_id':'doc1'})
 #print(entity)
 #********************************************PUT************************************************* 
@@ -41,8 +34,8 @@ def post_document():
         abort(400, 'No data received')
     entity = json.loads(data)
     print(entity)
-    #if '_id' not in entity:
-    #    abort(400, 'No _id specified')
+    if '_id' not in entity:
+        abort(400, 'No _id specified')
  #   if '_id_user' not in entity:
   #      abort(400, 'No _id_user specified')
     try:
@@ -55,18 +48,16 @@ def get_all_income():
     entity = db['income'].find()
     if not entity:
         abort(404, 'DB is empty')
-    #print(json.loads("{\"1\":\"2\"}"))
-    return json.loads(entity_to_str(entity))
+    return entity_to_str(entity)
 
 #get income for _id_user   
 @route('/income/:id', method='GET')
 def get_income(id):
-    print(id)
-    entity = db['income'].find_one({'_id': ObjectId(id)})
+    entity = db['income'].find_one({'_id': id})
     print(entity)
     if not entity:
         abort(404, 'No document with id %s' % id)
-    return JSONEncoder().encode(entity)
+    return entity
 
 #get user for id
 @route('/income/user/:id', method='GET')
@@ -165,6 +156,3 @@ def delete_expenditure_all():
     return entity
     
 run(host='localhost', port=8080)
-#application = bottle.default_app()
-#from paste import httpserver
-#httpserver.serve(application, host='0.0.0.0', port=80)
