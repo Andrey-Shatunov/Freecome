@@ -24,10 +24,14 @@ class JSONEncoder(json.JSONEncoder):
 @route('/income', method='PUT')
 def put_income():
     data = request.body.readline().decode('utf8')
-    lwist1=['id_user','sum','category','note','data']
+    lwist1=['_id_user','sum','category','note','data']
     if not data:
         abort(400, 'No data received')
-    entity = json.loads(data)
+    try:
+        entity = json.loads(data)
+    except json.decoder.JSONDecodeError:
+        abort(400, 'Wrong format')
+        
     if '_id' not in entity:
         abort(400, 'No _id specified')
         
@@ -48,25 +52,37 @@ def put_income():
     try:
         print(entity.keys())
         result=db['income'].update({"_id": ObjectId(entity['_id'])}, {"$set":{list_key[0]: entity[list_key[0]]}})
+        entity = db['income'].find_one({'_id': ObjectId(entity['_id'])})
     except bson.errors.BSONError:
         abort(400, '_id is wrong')
-    return result
+    except json.decoder.JSONDecodeError:
+        abort(400, '_id is wrong')
+    print("put result "+str(result))
+    return JSONEncoder().encode(entity)
 #********************************************POST*************************************************        
 @route('/income', method='POST')
 def post_income():
     data = request.body.readline().decode('utf8')
     if not data:
         abort(400, 'No data received')
-    entity = json.loads(data)
+    try:
+        entity = json.loads(data)
+    except json.decoder.JSONDecodeError:
+        abort(400, 'Wrong format')
     print(entity)
     if '_id' in entity:
         abort(400, 'Id generate auto')
+    if '_id_user' not in entity:
+        abort(400, 'No _id_user specified')
+    if 'sum' not in entity:
+        abort(400, 'No sum specified')
  #   if '_id_user' not in entity:
   #      abort(400, 'No _id_user specified')
     try:
         db['income'].save(entity)
     except pymongo.errors.WriteError as ve:
         abort(400, str(ve))
+    return JSONEncoder().encode(entity)
 #********************************************GET*************************************************       
 @route('/income', method='GET')
 def get_all_income():
@@ -96,7 +112,7 @@ def get_income_for_user(id):
     print(entity)
     if not entity:
         abort(404, 'No document with id %s' % id)
-    return entity
+    return JSONEncoder().encode(entity)
 #********************************************DELETE*************************************************    
 @route('/income/:id', method='DELETE')
 def delete_income(id):
@@ -117,14 +133,18 @@ def delete_income_all():
         print ('error/exception')
     return entity
 
-#********************************************PUT************************************************* 
+#********************************************PUT_expenditure************************************************* 
 @route('/expenditure', method='PUT')
 def put_expenditure():
     data = request.body.readline().decode('utf8')
-    lwist1=['id_user','sum','category','note','data']
+    lwist1=['_id_user','sum','category','note','data']
     if not data:
         abort(400, 'No data received')
-    entity = json.loads(data)
+    try:
+        entity = json.loads(data)
+    except json.decoder.JSONDecodeError:
+        abort(400, 'Wrong format')
+        
     if '_id' not in entity:
         abort(400, 'No _id specified')
         
@@ -145,25 +165,37 @@ def put_expenditure():
     try:
         print(entity.keys())
         result=db['expenditure'].update({"_id": ObjectId(entity['_id'])}, {"$set":{list_key[0]: entity[list_key[0]]}})
+        entity = db['expenditure'].find_one({'_id': ObjectId(entity['_id'])})
     except bson.errors.BSONError:
         abort(400, '_id is wrong')
-    return result
+    except json.decoder.JSONDecodeError:
+        abort(400, '_id is wrong')
+    print("put result "+str(result))
+    return JSONEncoder().encode(entity)
 #********************************************POST*************************************************        
 @route('/expenditure', method='POST')
 def post_expenditure():
     data = request.body.readline().decode('utf8')
     if not data:
         abort(400, 'No data received')
-    entity = json.loads(data)
+    try:
+        entity = json.loads(data)
+    except json.decoder.JSONDecodeError:
+        abort(400, 'Wrong format')
     print(entity)
     if '_id' in entity:
         abort(400, 'Id generate auto')
+    if '_id_user' not in entity:
+        abort(400, 'No _id_user specified')
+    if 'sum' not in entity:
+        abort(400, 'No sum specified')
  #   if '_id_user' not in entity:
   #      abort(400, 'No _id_user specified')
     try:
         db['expenditure'].save(entity)
     except pymongo.errors.WriteError as ve:
         abort(400, str(ve))
+    return JSONEncoder().encode(entity)
 #********************************************GET*************************************************       
 @route('/expenditure', method='GET')
 def get_all_expenditure():
@@ -193,7 +225,7 @@ def get_expenditure_for_user(id):
     print(entity)
     if not entity:
         abort(404, 'No document with id %s' % id)
-    return entity
+    return JSONEncoder().encode(entity)
 #********************************************DELETE*************************************************    
 @route('/expenditure/:id', method='DELETE')
 def delete_expenditure(id):
