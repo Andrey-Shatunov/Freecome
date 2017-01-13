@@ -22,7 +22,7 @@ class JSONEncoder(json.JSONEncoder):
 
 #********************************************PUT************************************************* 
 @route('/income', method='PUT')
-def put_document():
+def put_income():
     data = request.body.readline().decode('utf8')
     lwist1=['id_user','sum','category','note','data']
     if not data:
@@ -34,7 +34,7 @@ def put_document():
     list_key=list(entity.keys())
     
     if len(list_key) > 2:
-        abort(400, 'Many parametr')
+        abort(400, 'Many parameter')
         
     
     
@@ -44,7 +44,7 @@ def put_document():
     list_key.remove('_id')
     print("list_key"+str(list_key))
     if lwist1.count(list_key[0]) == 0:
-        abort(400, 'Wrong parametr')
+        abort(400, 'Wrong parameter')
     try:
         print(entity.keys())
         result=db['income'].update({"_id": ObjectId(entity['_id'])}, {"$set":{list_key[0]: entity[list_key[0]]}})
@@ -53,7 +53,7 @@ def put_document():
     return result
 #********************************************POST*************************************************        
 @route('/income', method='POST')
-def post_document():
+def post_income():
     data = request.body.readline().decode('utf8')
     if not data:
         abort(400, 'No data received')
@@ -80,7 +80,10 @@ def get_all_income():
 @route('/income/:id', method='GET')
 def get_income(id):
     print(id)
-    entity = db['income'].find_one({'_id': ObjectId(id)})
+    try:
+        entity = db['income'].find_one({'_id': ObjectId(id)})
+    except bson.errors.BSONError:
+        abort(400, '_id is wrong')
     print(entity)
     if not entity:
         abort(404, 'No document with id %s' % id)
@@ -97,7 +100,10 @@ def get_income_for_user(id):
 #********************************************DELETE*************************************************    
 @route('/income/:id', method='DELETE')
 def delete_income(id):
-    entity = db['income'].remove({'_id':id})
+    try:
+        entity = db['income'].remove({'_id':ObjectId(id)})
+    except bson.errors.BSONError:
+        abort(400, '_id is wrong')
     #if not entity:
         #abort(404, 'No document with id %s' % id)
     #result = db['income'].remove({'_id_user':id})
@@ -115,23 +121,33 @@ def delete_income_all():
 @route('/expenditure', method='PUT')
 def put_expenditure():
     data = request.body.readline().decode('utf8')
+    lwist1=['id_user','sum','category','note','data']
     if not data:
         abort(400, 'No data received')
     entity = json.loads(data)
-    #print(entity)
     if '_id' not in entity:
         abort(400, 'No _id specified')
+        
+    list_key=list(entity.keys())
+    
+    if len(list_key) > 2:
+        abort(400, 'Many parameter')
+        
+    
+    
+    print("list_key"+str(list_key))
+    print(lwist1.count(list_key[0]))
+    
+    list_key.remove('_id')
+    print("list_key"+str(list_key))
+    if lwist1.count(list_key[0]) == 0:
+        abort(400, 'Wrong parameter')
     try:
-       print(list(entity.keys()))
-       aaa=str(list(entity.keys())[1])
-       result=db['expenditure'].update({"_id": ObjectId(entity['_id'])}, {"$set":{list(entity.keys())[1]: entity[list(entity.keys())[1]]}})
-       
-       print(result)
-    except pymongo.errors.WriteError as ve:
-        abort(400, str(ve))
+        print(entity.keys())
+        result=db['expenditure'].update({"_id": ObjectId(entity['_id'])}, {"$set":{list_key[0]: entity[list_key[0]]}})
+    except bson.errors.BSONError:
+        abort(400, '_id is wrong')
     return result
-       
-
 #********************************************POST*************************************************        
 @route('/expenditure', method='POST')
 def post_expenditure():
@@ -140,8 +156,8 @@ def post_expenditure():
         abort(400, 'No data received')
     entity = json.loads(data)
     print(entity)
-    #if '_id' not in entity:
-    #    abort(400, 'No _id specified')
+    if '_id' in entity:
+        abort(400, 'Id generate auto')
  #   if '_id_user' not in entity:
   #      abort(400, 'No _id_user specified')
     try:
@@ -157,15 +173,18 @@ def get_all_expenditure():
     #print(json.loads("{\"1\":\"2\"}"))
     return json.loads(entity_to_str(entity))
 
-
 #get expenditure for _id_user   
 @route('/expenditure/:id', method='GET')
 def get_expenditure(id):
-    entity = db['expenditure'].find_one({'_id': id})
+    print(id)
+    try:
+        entity = db['expenditure'].find_one({'_id': ObjectId(id)})
+    except bson.errors.BSONError:
+        abort(400, '_id is wrong')
     print(entity)
     if not entity:
         abort(404, 'No document with id %s' % id)
-    return entity
+    return JSONEncoder().encode(entity)
 
 #get user for id
 @route('/expenditure/user/:id', method='GET')
@@ -178,7 +197,10 @@ def get_expenditure_for_user(id):
 #********************************************DELETE*************************************************    
 @route('/expenditure/:id', method='DELETE')
 def delete_expenditure(id):
-    entity = db['expenditure'].remove({'_id':id})
+    try:
+        entity = db['expenditure'].remove({'_id':ObjectId(id)})
+    except bson.errors.BSONError:
+        abort(400, '_id is wrong')
     #if not entity:
         #abort(404, 'No document with id %s' % id)
     #result = db['expenditure'].remove({'_id_user':id})
