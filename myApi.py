@@ -24,7 +24,7 @@ class JSONEncoder(json.JSONEncoder):
 @route('/income', method='PUT')
 def put_income():
     data = request.body.readline().decode('utf8')
-    lwist1=['_id_user','sum','category','note','data']
+    lwist1=['_id_user','sum','category','note','data','customer']
     if not data:
         abort(400, 'No data received')
     try:
@@ -76,6 +76,8 @@ def post_income():
         abort(400, 'No _id_user specified')
     if 'sum' not in entity:
         abort(400, 'No sum specified')
+    if 'customer' not in entity:
+        abort(400, 'No customer specified')
  #   if '_id_user' not in entity:
   #      abort(400, 'No _id_user specified')
     try:
@@ -92,7 +94,7 @@ def get_all_income():
     #print(json.loads("{\"1\":\"2\"}"))
     s=entity_to_str(entity)
     print(s)
-    return JSONEncoder().encode(s)
+    return s
 
 #get income for _id_user   
 @route('/income/:id', method='GET')
@@ -191,6 +193,8 @@ def post_expenditure():
         abort(400, 'No _id_user specified')
     if 'sum' not in entity:
         abort(400, 'No sum specified')
+    if 'customer' not in entity:
+        abort(400, 'No customer specified')
  #   if '_id_user' not in entity:
   #      abort(400, 'No _id_user specified')
     try:
@@ -248,7 +252,115 @@ def delete_expenditure_all():
         print ('error/exception')
     return entity
 
+#***************************************************************************************************
+#********************************************PUT_customer************************************************* 
+@route('/customer', method='PUT')
+def put_customer():
+    data = request.body.readline().decode('utf8')
+    lwist1=['name']
+    if not data:
+        abort(400, 'No data received')
+    try:
+        entity = json.loads(data)
+    except json.decoder.JSONDecodeError:
+        abort(400, 'Wrong format')
+        
+    if '_id' not in entity:
+        abort(400, 'No _id specified')
+        
+    list_key=list(entity.keys())
+    
+    if len(list_key) > 2:
+        abort(400, 'Many parameter')
+        
+    
+    
+    print("list_key"+str(list_key))
+    print(lwist1.count(list_key[0]))
+    
+    list_key.remove('_id')
+    print("list_key"+str(list_key))
+    if lwist1.count(list_key[0]) == 0:
+        abort(400, 'Wrong parameter')
+    try:
+        print(entity.keys())
+        result=db['customer'].update({"_id": ObjectId(entity['_id'])}, {"$set":{list_key[0]: entity[list_key[0]]}})
+        entity = db['customer'].find_one({'_id': ObjectId(entity['_id'])})
+    except bson.errors.BSONError:
+        abort(400, '_id is wrong')
+    except json.decoder.JSONDecodeError:
+        abort(400, '_id is wrong')
+    print("put result "+str(result))
+    return JSONEncoder().encode(entity)
+#********************************************POST*************************************************        
+@route('/customer', method='POST')
+def post_customer():
+    data = request.body.readline().decode('utf8')
+    if not data:
+        abort(400, 'No data received')
+    try:
+        entity = json.loads(data)
+    except json.decoder.JSONDecodeError:
+        abort(400, 'Wrong format')
+    print(entity)
+    if '_id' in entity:
+        abort(400, 'Id generate auto')
+    if 'customer' not in entity:
+        abort(400, 'No customer specified')
+    list_key=list(entity.keys())
+    if len(list_key) > 1:
+        abort(400, 'Many parameter')
+ #   if '_id_user' not in entity:
+  #      abort(400, 'No _id_user specified')
+    try:
+        db['customer'].save(entity)
+    except pymongo.errors.WriteError as ve:
+        abort(400, str(ve))
+    return JSONEncoder().encode(entity)
+#********************************************GET*************************************************       
+@route('/customer', method='GET')
+def get_all_customer():
+    entity = db['customer'].find()
+    if not entity:
+        abort(404, 'DB is empty')
+    #print(json.loads("{\"1\":\"2\"}"))
+    s=entity_to_str(entity)
+    print(s)
+    return s
 
+#get customer for _id_user   
+@route('/customer/:id', method='GET')
+def get_customer(id):
+    print(id)
+    try:
+        entity = db['customer'].find_one({'_id': ObjectId(id)})
+    except bson.errors.BSONError:
+        abort(400, '_id is wrong')
+    print(entity)
+    if not entity:
+        abort(404, 'No document with id %s' % id)
+    return JSONEncoder().encode(entity)
+#********************************************DELETE*************************************************    
+@route('/customer/:id', method='DELETE')
+def delete_customer(id):
+    try:
+        entity = db['customer'].remove({'_id':ObjectId(id)})
+    except bson.errors.BSONError:
+        abort(400, '_id is wrong')
+    #if not entity:
+        #abort(404, 'No document with id %s' % id)
+    #result = db['customer'].remove({'_id_user':id})
+    return entity
+ 
+@route('/customer/all/', method='DELETE')
+def delete_customer_all():
+    try:
+        entity = db['customer'].remove({})
+    except:
+        print ('error/exception')
+    return entity
+    
+    
 run(host='localhost', port=8080)
 #application = bottle.default_app()
 #from paste import httpserver
