@@ -90,7 +90,9 @@ def get_all_income():
     if not entity:
         abort(404, 'DB is empty')
     #print(json.loads("{\"1\":\"2\"}"))
-    return json.loads(entity_to_str(entity))
+    s=entity_to_str(entity)
+    print(s)
+    return JSONEncoder().encode(s)
 
 #get income for _id_user   
 @route('/income/:id', method='GET')
