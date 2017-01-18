@@ -15,3 +15,10 @@ def entity_to_str(entity):
     str1=str1[0:(len(str1)-2)]
     str1='''['''+str1+''']'''
     return str1
+    
+def is_number(str):
+    try:
+        float(str)
+        return True
+    except ValueError:
+        return False

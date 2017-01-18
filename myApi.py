@@ -5,7 +5,7 @@ from bottle import route, run, request, abort
 from pymongo import Connection
 import pymongo
 #from bson.json_util import dumps
-from income_to import entity_to_str
+from income_to import entity_to_str, is_number
 from bson.objectid import ObjectId
 
 connection = Connection('localhost', 27017)
@@ -33,18 +33,12 @@ def put_income():
         abort(400, 'Wrong format')
         
     if '_id' not in entity:
-        abort(400, 'No _id specified')
-        
+        abort(400, 'No _id specified')  
     list_key=list(entity.keys())
-    
     if len(list_key) > 2:
         abort(400, 'Many parameter')
-        
-    
-    
-    print("list_key"+str(list_key))
-    print(lwist1.count(list_key[0]))
-    
+    #print("list_key"+str(list_key))
+    #print(lwist1.count(list_key[0]))
     list_key.remove('_id')
     print("list_key"+str(list_key))
     if lwist1.count(list_key[0]) == 0:
@@ -62,6 +56,7 @@ def put_income():
 #********************************************POST*************************************************        
 @route('/income', method='POST')
 def post_income():
+    lwist1=['_id_user','sum','category','note','data','customer']
     data = request.body.readline().decode('utf8')
     if not data:
         abort(400, 'No data received')
@@ -78,8 +73,14 @@ def post_income():
         abort(400, 'No sum specified')
     if 'customer' not in entity:
         abort(400, 'No customer specified')
- #   if '_id_user' not in entity:
-  #      abort(400, 'No _id_user specified')
+    if is_number(entity['sum'])== False:
+        abort(400, 'sum is not int')
+    #   if '_id_user' not in entity:
+    #      abort(400, 'No _id_user specified')
+    #list_key=list(entity.keys())
+    for i in list(entity.keys()):
+        if lwist1.count(i) == 0:
+            abort(400, 'Wrong parameter')
     try:
         db['income'].save(entity)
     except pymongo.errors.WriteError as ve:
@@ -179,6 +180,7 @@ def put_expenditure():
 #********************************************POST*************************************************        
 @route('/expenditure', method='POST')
 def post_expenditure():
+    lwist1=['_id_user','sum','category','note','data','customer']
     data = request.body.readline().decode('utf8')
     if not data:
         abort(400, 'No data received')
@@ -195,8 +197,15 @@ def post_expenditure():
         abort(400, 'No sum specified')
     if 'customer' not in entity:
         abort(400, 'No customer specified')
- #   if '_id_user' not in entity:
-  #      abort(400, 'No _id_user specified')
+    if is_number(entity['sum'])== False:
+        abort(400, 'sum is not int')
+    #   if '_id_user' not in entity:
+    #      abort(400, 'No _id_user specified')
+    
+    #list_key=list(entity.keys())
+    for i in list(entity.keys()):
+        if lwist1.count(i) == 0:
+            abort(400, 'Wrong parameter')
     try:
         db['expenditure'].save(entity)
     except pymongo.errors.WriteError as ve:
@@ -208,8 +217,11 @@ def get_all_expenditure():
     entity = db['expenditure'].find()
     if not entity:
         abort(404, 'DB is empty')
-    #print(json.loads("{\"1\":\"2\"}"))
-    return json.loads(entity_to_str(entity))
+    print(json.loads("[{\"1\":\"2\"}]"))
+    s=entity_to_str(entity)
+    asd=json.loads(s)
+    print(asd[0])
+    return s
 
 #get expenditure for _id_user   
 @route('/expenditure/:id', method='GET')
