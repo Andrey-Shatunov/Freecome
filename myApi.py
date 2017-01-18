@@ -33,11 +33,14 @@ def put_income():
         my_data = json.loads(data)
     except json.decoder.JSONDecodeError:
         abort(400, 'Wrong format')
-       
-    tmp=db['income'].find_one({'_id': ObjectId(my_data['_id'])}) 
-    
     if '_id' not in my_data:
-        abort(400, 'No _id specified')  
+        abort(400, 'No _id specified') 
+    try:
+        tmp=db['income'].find_one({'_id': ObjectId(my_data['_id'])}) 
+    except bson.errors.BSONError:
+        abort(400, '_id is wrong')
+ 
+ 
     for i in list(my_data.keys()):
         if lwist1.count(i) == 0:
             abort(400, 'Wrong parameter %s' % i)
@@ -170,11 +173,14 @@ def put_expenditure():
         my_data = json.loads(data)
     except json.decoder.JSONDecodeError:
         abort(400, 'Wrong format')
-       
-    tmp=db['expenditure'].find_one({'_id': ObjectId(my_data['_id'])}) 
-    
     if '_id' not in my_data:
-        abort(400, 'No _id specified')  
+        abort(400, 'No _id specified') 
+     
+    try:
+        tmp=db['expenditure'].find_one({'_id': ObjectId(my_data['_id'])})
+    except bson.errors.BSONError:
+        abort(400, '_id is wrong')
+ 
     for i in list(my_data.keys()):
         if lwist1.count(i) == 0:
             abort(400, 'Wrong parameter %s' % i)
