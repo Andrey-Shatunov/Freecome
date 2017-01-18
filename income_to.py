@@ -7,9 +7,9 @@ class JSONEncoder(json.JSONEncoder):
             return str(o)
         return json.JSONEncoder.default(self, o)
 
-def entity_to_str(entity):
+def my_data_to_str(my_data):
     str1=""
-    for i,value in enumerate(entity,1):
+    for i,value in enumerate(my_data,1):
         str1=str1+str(JSONEncoder().encode(value))+''', '''
 
     str1=str1[0:(len(str1)-2)]
