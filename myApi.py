@@ -108,11 +108,11 @@ def get_income(id):
 #get user for id
 @route('/income/user/:id', method='GET')
 def get_income_for_user(id):
-    my_data = db['income'].find_one({'_id_user':id})
+    my_data = db['income'].find({'_id_user':id})
     print(my_data)
     if not my_data:
         abort(404, 'No document with id %s' % id)
-    return JSONEncoder().encode(my_data)
+    return my_data_to_str(my_data)
 #********************************************DELETE*************************************************    
 @route('/income/:id', method='DELETE')
 def delete_income(id):
@@ -221,11 +221,11 @@ def get_expenditure(id):
 #get user for id
 @route('/expenditure/user/:id', method='GET')
 def get_expenditure_for_user(id):
-    my_data = db['expenditure'].find_one({'_id_user':id})
+    my_data = db['expenditure'].find({'_id_user':id})
     print(my_data)
     if not my_data:
         abort(404, 'No document with id %s' % id)
-    return JSONEncoder().encode(my_data)
+    return my_data_to_str(my_data)
 #********************************************DELETE*************************************************    
 @route('/expenditure/:id', method='DELETE')
 def delete_expenditure(id):
