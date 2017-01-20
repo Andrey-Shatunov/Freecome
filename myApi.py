@@ -1,15 +1,10 @@
 import json
 import bson
-#import bottle
 from bottle import route, run, request, abort
 from pymongo import Connection
 import pymongo
-#from bson.json_util import dumps
 from income_to import my_data_to_str, is_number
 from bson.objectid import ObjectId
-
-connection = Connection('localhost', 27017)
-db = connection.mydatabase
 
 class JSONEncoder(json.JSONEncoder):
     def default(self, o):
@@ -19,7 +14,11 @@ class JSONEncoder(json.JSONEncoder):
 ###
 #my_data = db['documents'].find_one({'_id':'doc1'})
 #print(my_data)
-#********************************************PUT************************************************* 
+
+connection = Connection('localhost', 27017)
+db = connection.mydatabase
+
+#********************************************PUT**********************************
 @route('/income', method='PUT')
 def put_income():
  
@@ -28,7 +27,6 @@ def put_income():
 
     if not data:
         abort(400, 'No data received')
-
     try:
         my_data = json.loads(data)
     except json.decoder.JSONDecodeError:
@@ -39,47 +37,23 @@ def put_income():
         tmp=db['income'].find_one({'_id': ObjectId(my_data['_id'])}) 
     except bson.errors.BSONError:
         abort(400, '_id is wrong')
- 
- 
     for i in list(my_data.keys()):
         if lwist1.count(i) == 0:
             abort(400, 'Wrong parameter %s' % i)
         else:
             if i!='_id':
-                tmp[i]=my_data[i]
-        
+                tmp[i]=my_data[i]     
     try:
         db['income'].save(tmp)
     except pymongo.errors.WriteError as ve:
         abort(400, str(ve))
     return JSONEncoder().encode(tmp)
-'''
-
-    list_key=list(my_data.keys())
-    if len(list_key) > 2:
-        abort(400, 'Many parameter')
-    #print("list_key"+str(list_key))
-    #print(lwist1.count(list_key[0]))
-    list_key.remove('_id')
-    print("list_key"+str(list_key))
-    if lwist1.count(list_key[0]) == 0:
-        abort(400, 'Wrong parameter')
-    try:
-        print(my_data.keys())
-        result=db['income'].update({"_id": ObjectId(my_data['_id'])}, {"$set":{list_key[0]: my_data[list_key[0]]}})
-        my_data = db['income'].find_one({'_id': ObjectId(my_data['_id'])})
-    except bson.errors.BSONError:
-        abort(400, '_id is wrong')
-    except json.decoder.JSONDecodeError:
-        abort(400, '_id is wrong')
-    print("put result "+str(result))
-    return JSONEncoder().encode(my_data)
- '''
 #********************************************POST*************************************************        
 @route('/income', method='POST')
 def post_income():
     lwist1=['_id_user','sum','category','note','data','customer']
     data = request.body.readline().decode('utf8')
+    print(data)
     if not data:
         abort(400, 'No data received')
     try:
@@ -116,7 +90,6 @@ def get_all_income():
         abort(404, 'DB is empty')
     #print(json.loads("{\"1\":\"2\"}"))
     s=my_data_to_str(my_data)
-    print(s)
     return s
 
 #get income for _id_user   
@@ -165,29 +138,24 @@ def delete_income_all():
 def put_expenditure():
     data = request.body.readline().decode('utf8')
     lwist1=['_id_user','sum','category','note','data','customer','_id']
-
     if not data:
         abort(400, 'No data received')
-
     try:
         my_data = json.loads(data)
     except json.decoder.JSONDecodeError:
         abort(400, 'Wrong format')
     if '_id' not in my_data:
-        abort(400, 'No _id specified') 
-     
+        abort(400, 'No _id specified')    
     try:
         tmp=db['expenditure'].find_one({'_id': ObjectId(my_data['_id'])})
     except bson.errors.BSONError:
         abort(400, '_id is wrong')
- 
     for i in list(my_data.keys()):
         if lwist1.count(i) == 0:
             abort(400, 'Wrong parameter %s' % i)
         else:
             if i!='_id':
-                tmp[i]=my_data[i]
-        
+                tmp[i]=my_data[i]  
     try:
         db['expenditure'].save(tmp)
     except pymongo.errors.WriteError as ve:
@@ -217,7 +185,6 @@ def post_expenditure():
         abort(400, 'sum is not int')
     #   if '_id_user' not in my_data:
     #      abort(400, 'No _id_user specified')
-    
     #list_key=list(my_data.keys())
     for i in list(my_data.keys()):
         if lwist1.count(i) == 0:
@@ -233,10 +200,9 @@ def get_all_expenditure():
     my_data = db['expenditure'].find()
     if not my_data:
         abort(404, 'DB is empty')
-    print(json.loads("[{\"1\":\"2\"}]"))
+    #print(json.loads("{\"1\":\"2\"}"))
     s=my_data_to_str(my_data)
-    asd=json.loads(s)
-    print(asd[0])
+    print(s)
     return s
 
 #get expenditure for _id_user   
@@ -353,7 +319,7 @@ def get_all_customer():
         abort(404, 'DB is empty')
     #print(json.loads("{\"1\":\"2\"}"))
     s=my_data_to_str(my_data)
-    print(s)
+    #print(s)
     return s
 
 #get customer for _id_user   
