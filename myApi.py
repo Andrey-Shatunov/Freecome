@@ -89,8 +89,8 @@ def get_all_income():
     if not my_data:
         abort(404, 'DB is empty')
     #print(json.loads("{\"1\":\"2\"}"))
-    s=my_data_to_str(my_data)
-    return s
+    #s=my_data_to_str(my_data)
+    return my_data_to_str(my_data)
 
 #get income for _id_user   
 @route('/income/:id', method='GET')
@@ -201,9 +201,9 @@ def get_all_expenditure():
     if not my_data:
         abort(404, 'DB is empty')
     #print(json.loads("{\"1\":\"2\"}"))
-    s=my_data_to_str(my_data)
-    print(s)
-    return s
+    #s=my_data_to_str(my_data)
+    #print(s)
+    return my_data_to_str(my_data)
 
 #get expenditure for _id_user   
 @route('/expenditure/:id', method='GET')
