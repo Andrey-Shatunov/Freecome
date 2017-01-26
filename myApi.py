@@ -1,23 +1,50 @@
 import json
 import bson
-from bottle import route, run, request, abort
+from bottle import post, route, run, request, abort,template,response
 from pymongo import Connection
 import pymongo
 from income_to import my_data_to_str, is_number
 from bson.objectid import ObjectId
+import os
+import http.cookies
 
 class JSONEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, ObjectId):
             return str(o)
         return json.JSONEncoder.default(self, o)
-###
-#my_data = db['documents'].find_one({'_id':'doc1'})
-#print(my_data)
 
 connection = Connection('localhost', 27017)
 db = connection.mydatabase
 
+
+
+
+@post("/user")
+def foo():
+    asd=request.forms.get("age")  # Получить содержимое одного поля age
+    print(asd)
+    print(request.get_cookie("name"))
+    print("------------------------")
+    print(str(request.headers['Host']))
+    for i in request.headers:
+        print(str(i))
+    print("------------------------")
+    d={}
+    d['name']=request.forms.get("name")
+    d['password']=request.forms.get("password")
+    db['users'].save(d)
+    response.set_cookie("name", "11111", secret='qwe')
+    print(response._cookies['name'])
+    return "Hello word"
+
+@route('/', method='GET')
+def hello_income():
+    cookie = http.cookies.SimpleCookie(os.environ.get("HTTP_COOKIE"))
+    #if cookie['name'] is not None:
+    print(cookie.get("name"))
+    print(request.get_cookie("name"))
+    return template('template_name', name="asd")
 #********************************************PUT**********************************
 @route('/income', method='PUT')
 def put_income():
@@ -53,6 +80,11 @@ def put_income():
 def post_income():
     lwist1=['_id_user','sum','category','note','data','customer']
     data = request.body.readline().decode('utf8')
+    print("------------------------")
+    print(str(request.headers['Host']))
+    for i in request.headers:
+        print(str(i))
+    print("------------------------")
     print(data)
     if not data:
         abort(400, 'No data received')
@@ -71,9 +103,7 @@ def post_income():
         abort(400, 'No customer specified')
     if is_number(my_data['sum'])== False:
         abort(400, 'sum is not int')
-    #   if '_id_user' not in my_data:
-    #      abort(400, 'No _id_user specified')
-    #list_key=list(my_data.keys())
+
     for i in list(my_data.keys()):
         if lwist1.count(i) == 0:
             abort(400, 'Wrong parameter')
@@ -88,8 +118,6 @@ def get_all_income():
     my_data = db['income'].find()
     if not my_data:
         abort(404, 'DB is empty')
-    #print(json.loads("{\"1\":\"2\"}"))
-    #s=my_data_to_str(my_data)
     return my_data_to_str(my_data)
 
 #get income for _id_user   
@@ -120,9 +148,6 @@ def delete_income(id):
         my_data = db['income'].remove({'_id':ObjectId(id)})
     except bson.errors.BSONError:
         abort(400, '_id is wrong')
-    #if not my_data:
-        #abort(404, 'No document with id %s' % id)
-    #result = db['income'].remove({'_id_user':id})
     return my_data
  
 @route('/income/all/', method='DELETE')
@@ -183,9 +208,7 @@ def post_expenditure():
         abort(400, 'No customer specified')
     if is_number(my_data['sum'])== False:
         abort(400, 'sum is not int')
-    #   if '_id_user' not in my_data:
-    #      abort(400, 'No _id_user specified')
-    #list_key=list(my_data.keys())
+        
     for i in list(my_data.keys()):
         if lwist1.count(i) == 0:
             abort(400, 'Wrong parameter')
@@ -200,9 +223,6 @@ def get_all_expenditure():
     my_data = db['expenditure'].find()
     if not my_data:
         abort(404, 'DB is empty')
-    #print(json.loads("{\"1\":\"2\"}"))
-    #s=my_data_to_str(my_data)
-    #print(s)
     return my_data_to_str(my_data)
 
 #get expenditure for _id_user   
@@ -213,7 +233,7 @@ def get_expenditure(id):
         my_data = db['expenditure'].find_one({'_id': ObjectId(id)})
     except bson.errors.BSONError:
         abort(400, '_id is wrong')
-    print(my_data)
+    print(type(my_data))
     if not my_data:
         abort(404, 'No document with id %s' % id)
     return JSONEncoder().encode(my_data)
@@ -233,9 +253,6 @@ def delete_expenditure(id):
         my_data = db['expenditure'].remove({'_id':ObjectId(id)})
     except bson.errors.BSONError:
         abort(400, '_id is wrong')
-    #if not my_data:
-        #abort(404, 'No document with id %s' % id)
-    #result = db['expenditure'].remove({'_id_user':id})
     return my_data
  
 @route('/expenditure/all/', method='DELETE')
@@ -266,12 +283,10 @@ def put_customer():
     
     if len(list_key) > 2:
         abort(400, 'Many parameter')
-        
-    
-    
-    print("list_key"+str(list_key))
-    print(lwist1.count(list_key[0]))
-    
+
+   # print("list_key"+str(list_key))
+    #print(lwist1.count(list_key[0]))
+
     list_key.remove('_id')
     print("list_key"+str(list_key))
     if lwist1.count(list_key[0]) == 0:
@@ -304,8 +319,7 @@ def post_customer():
     list_key=list(my_data.keys())
     if len(list_key) > 1:
         abort(400, 'Many parameter')
- #   if '_id_user' not in my_data:
-  #      abort(400, 'No _id_user specified')
+        
     try:
         db['customer'].save(my_data)
     except pymongo.errors.WriteError as ve:
@@ -317,9 +331,7 @@ def get_all_customer():
     my_data = db['customer'].find()
     if not my_data:
         abort(404, 'DB is empty')
-    #print(json.loads("{\"1\":\"2\"}"))
     s=my_data_to_str(my_data)
-    #print(s)
     return s
 
 #get customer for _id_user   
@@ -341,9 +353,6 @@ def delete_customer(id):
         my_data = db['customer'].remove({'_id':ObjectId(id)})
     except bson.errors.BSONError:
         abort(400, '_id is wrong')
-    #if not my_data:
-        #abort(404, 'No document with id %s' % id)
-    #result = db['customer'].remove({'_id_user':id})
     return my_data
  
 @route('/customer/all/', method='DELETE')
@@ -355,7 +364,7 @@ def delete_customer_all():
     return my_data
     
     
-run(host='localhost', port=8080)
+#run(host='localhost', port=8080)
 #application = bottle.default_app()
 #from paste import httpserver
 #httpserver.serve(application, host='0.0.0.0', port=80)
