@@ -1,5 +1,6 @@
 import json
 import bson
+import bottle
 from bottle import post, route, run, request, abort,template,response
 from pymongo import Connection
 import pymongo
@@ -7,6 +8,10 @@ from income_to import my_data_to_str, is_number
 from bson.objectid import ObjectId
 import os
 import http.cookies
+import logging
+from cork import Cork
+from beaker.middleware import SessionMiddleware
+import datetime
 
 class JSONEncoder(json.JSONEncoder):
     def default(self, o):
@@ -17,7 +22,85 @@ class JSONEncoder(json.JSONEncoder):
 connection = Connection('localhost', 27017)
 db = connection.mydatabase
 
+#--------------
+logging.basicConfig(format='localhost - - [%(asctime)s] %(message)s', level=logging.DEBUG)
+log = logging.getLogger(__name__)
+bottle.debug(True)
 
+# Use users.json and roles.json in the local example_conf directory
+aaa = Cork('conf', email_sender='avsh_174o@mail.ru', smtp_url='smtp://avsh_174:qwerty123456@smtp.mail.ru:465')
+
+# alias the authorization decorator with defaults
+authorize = aaa.make_auth_decorator(fail_redirect="/login", role="user")
+
+
+app = bottle.app()
+session_opts = {
+    'session.cookie_expires': True,
+    'session.encrypt_key': 'Qwwwew123141*u',
+    'session.httponly': True,
+    'session.timeout': 3600 * 24,  # 1 day
+    'session.type': 'cookie',
+    'session.validate_key': True,
+}
+app = SessionMiddleware(app, session_opts)
+
+
+# #  Bottle methods  # #
+
+def postd():
+    return bottle.request.forms
+
+
+def post_get(name, default=''):
+    return bottle.request.POST.get(name, default).strip()
+
+
+@post('/login')
+def login():
+    """Authenticate users"""
+    username = post_get('username')
+    password = post_get('password')
+    print("str name "+str(username))
+    print(password)
+    aaa.login(username, password, success_redirect='/', fail_redirect='/sorry_page')
+
+@route('/')
+def index():
+    """Only authenticated users can see this"""
+    aaa.require(fail_redirect='/sorry_page')
+    return 'Welcome! %s <a href="/admin">Admin page</a> <a href="/logout">Logout</a>' % aaa.current_user.username
+
+
+@bottle.route('/logout')
+def logout():
+    aaa.logout(success_redirect='/login')
+    
+@route('/sorry_page')
+def sorry_page():
+    """Serve sorry page"""
+    return '<p>Sorry, you are not authorized to perform this action</p>'
+
+@bottle.post('/register')
+def register():
+    """Send out registration email"""
+    aaa.register(post_get('username'), post_get('password'), post_get('email_address'))
+    return 'Please check your mailbox.'
+
+
+@bottle.route('/validate_registration/:registration_code')
+def validate_registration(registration_code):
+    """Validate registration, create user account"""
+    aaa.validate_registration(registration_code)
+    return 'Thanks. <a href="/login">Go to login</a>'
+
+    
+@bottle.route('/login')
+@bottle.view('login_form')
+def login_form():
+    """Serve login form"""
+    return {}
+#--------------
 
 
 @post("/user")
@@ -38,17 +121,10 @@ def foo():
     print(response._cookies['name'])
     return "Hello word"
 
-@route('/', method='GET')
-def hello_income():
-    cookie = http.cookies.SimpleCookie(os.environ.get("HTTP_COOKIE"))
-    #if cookie['name'] is not None:
-    print(cookie.get("name"))
-    print(request.get_cookie("name"))
-    return template('template_name', name="asd")
 #********************************************PUT**********************************
 @route('/income', method='PUT')
 def put_income():
- 
+    aaa.require(fail_redirect='/sorry_page')
     data = request.body.readline().decode('utf8')
     lwist1=['_id_user','sum','category','note','data','customer','_id']
 
@@ -78,6 +154,7 @@ def put_income():
 #********************************************POST*************************************************        
 @route('/income', method='POST')
 def post_income():
+    aaa.require(fail_redirect='/sorry_page')
     lwist1=['_id_user','sum','category','note','data','customer']
     data = request.body.readline().decode('utf8')
     print("------------------------")
@@ -115,6 +192,7 @@ def post_income():
 #********************************************GET*************************************************       
 @route('/income', method='GET')
 def get_all_income():
+    aaa.require(fail_redirect='/sorry_page')
     my_data = db['income'].find()
     if not my_data:
         abort(404, 'DB is empty')
@@ -123,6 +201,7 @@ def get_all_income():
 #get income for _id_user   
 @route('/income/:id', method='GET')
 def get_income(id):
+    aaa.require(fail_redirect='/sorry_page')
     print(id)
     try:
         my_data = db['income'].find_one({'_id': ObjectId(id)})
@@ -136,6 +215,7 @@ def get_income(id):
 #get user for id
 @route('/income/user/:id', method='GET')
 def get_income_for_user(id):
+    aaa.require(fail_redirect='/sorry_page')
     my_data = db['income'].find({'_id_user':id})
     print(my_data)
     if not my_data:
@@ -144,6 +224,7 @@ def get_income_for_user(id):
 #********************************************DELETE*************************************************    
 @route('/income/:id', method='DELETE')
 def delete_income(id):
+    aaa.require(fail_redirect='/sorry_page')
     try:
         my_data = db['income'].remove({'_id':ObjectId(id)})
     except bson.errors.BSONError:
@@ -152,6 +233,7 @@ def delete_income(id):
  
 @route('/income/all/', method='DELETE')
 def delete_income_all():
+    aaa.require(fail_redirect='/sorry_page')
     try:
         my_data = db['income'].remove({})
     except:
@@ -161,6 +243,7 @@ def delete_income_all():
 #********************************************PUT_expenditure************************************************* 
 @route('/expenditure', method='PUT')
 def put_expenditure():
+    aaa.require(fail_redirect='/sorry_page')
     data = request.body.readline().decode('utf8')
     lwist1=['_id_user','sum','category','note','data','customer','_id']
     if not data:
@@ -189,6 +272,7 @@ def put_expenditure():
 #********************************************POST*************************************************        
 @route('/expenditure', method='POST')
 def post_expenditure():
+    aaa.require(fail_redirect='/sorry_page')
     lwist1=['_id_user','sum','category','note','data','customer']
     data = request.body.readline().decode('utf8')
     if not data:
@@ -363,8 +447,8 @@ def delete_customer_all():
         print ('error/exception')
     return my_data
     
-    
-#run(host='localhost', port=8080)
+bottle.debug(True)
+run(app=app,host='localhost', port=8080,quiet=False)
 #application = bottle.default_app()
 #from paste import httpserver
 #httpserver.serve(application, host='0.0.0.0', port=80)
