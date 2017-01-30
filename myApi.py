@@ -28,7 +28,7 @@ log = logging.getLogger(__name__)
 bottle.debug(True)
 
 # Use users.json and roles.json in the local example_conf directory
-aaa = Cork('conf', email_sender='avsh_174o@mail.ru', smtp_url='smtp://avsh_174:qwerty123456@smtp.mail.ru:465')
+aaa = Cork('conf', email_sender='avsh_174o@mail.ru', smtp_url='ssl://avsh_174@mail.ru:qwerty123456@smtp.mail.ru:465')
 
 # alias the authorization decorator with defaults
 authorize = aaa.make_auth_decorator(fail_redirect="/login", role="user")
@@ -69,7 +69,7 @@ def login():
 def index():
     """Only authenticated users can see this"""
     aaa.require(fail_redirect='/sorry_page')
-    return 'Welcome! %s <a href="/admin">Admin page</a> <a href="/logout">Logout</a>' % aaa.current_user.username
+    return 'Welcome! %s ' % aaa.current_user.username
 
 
 @bottle.route('/logout')
