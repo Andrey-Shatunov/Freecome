@@ -28,7 +28,7 @@ log = logging.getLogger(__name__)
 bottle.debug(True)
 
 # Use users.json and roles.json in the local example_conf directory
-aaa = Cork('conf', email_sender='avsh_174@mail.ru', smtp_url='***')
+aaa = Cork('conf', email_sender='avsh_174@mail.ru', smtp_url='ssl://avsh_174@mail.ru:qwerty123456@smtp.mail.ru:465')
 
 # alias the authorization decorator with defaults
 authorize = aaa.make_auth_decorator(fail_redirect="/login", role="user")
@@ -53,6 +53,7 @@ def postd():
 
 
 def post_get(name, default=''):
+    print(bottle.request)
     return bottle.request.POST.get(name, default).strip()
 
 
@@ -154,7 +155,7 @@ def put_income():
 #********************************************POST*************************************************        
 @route('/income', method='POST')
 def post_income():
-    aaa.require(fail_redirect='/sorry_page')
+    #aaa.require(fail_redirect='/sorry_page')
     lwist1=['_id_user','sum','category','note','data','customer']
     data = request.body.readline().decode('utf8')
     print("------------------------")
@@ -192,16 +193,19 @@ def post_income():
 #********************************************GET*************************************************       
 @route('/income', method='GET')
 def get_all_income():
-    aaa.require(fail_redirect='/sorry_page')
+    #aaa.require(fail_redirect='/sorry_page')
     my_data = db['income'].find()
+    l=[]
+    for i in my_data:
+        l.append(JSONEncoder().encode(i))
     if not my_data:
         abort(404, 'DB is empty')
-    return my_data_to_str(my_data)
+    return l
 
 #get income for _id_user   
 @route('/income/:id', method='GET')
 def get_income(id):
-    aaa.require(fail_redirect='/sorry_page')
+    #aaa.require(fail_redirect='/sorry_page')
     print(id)
     try:
         my_data = db['income'].find_one({'_id': ObjectId(id)})
@@ -215,12 +219,14 @@ def get_income(id):
 #get user for id
 @route('/income/user/:id', method='GET')
 def get_income_for_user(id):
-    aaa.require(fail_redirect='/sorry_page')
+    #aaa.require(fail_redirect='/sorry_page')
     my_data = db['income'].find({'_id_user':id})
-    print(my_data)
+    l=[]
+    for i in my_data:
+        l.append(JSONEncoder().encode(i))
     if not my_data:
-        abort(404, 'No document with id %s' % id)
-    return my_data_to_str(my_data)
+        abort(404, 'DB is empty')
+    return l
 #********************************************DELETE*************************************************    
 @route('/income/:id', method='DELETE')
 def delete_income(id):
@@ -305,9 +311,12 @@ def post_expenditure():
 @route('/expenditure', method='GET')
 def get_all_expenditure():
     my_data = db['expenditure'].find()
+    l=[]
+    for i in my_data:
+        l.append(JSONEncoder().encode(i))
     if not my_data:
         abort(404, 'DB is empty')
-    return my_data_to_str(my_data)
+    return l
 
 #get expenditure for _id_user   
 @route('/expenditure/:id', method='GET')
@@ -326,10 +335,12 @@ def get_expenditure(id):
 @route('/expenditure/user/:id', method='GET')
 def get_expenditure_for_user(id):
     my_data = db['expenditure'].find({'_id_user':id})
-    print(my_data)
+    l=[]
+    for i in my_data:
+        l.append(JSONEncoder().encode(i))
     if not my_data:
-        abort(404, 'No document with id %s' % id)
-    return my_data_to_str(my_data)
+        abort(404, 'DB is empty')
+    return l
 #********************************************DELETE*************************************************    
 @route('/expenditure/:id', method='DELETE')
 def delete_expenditure(id):
