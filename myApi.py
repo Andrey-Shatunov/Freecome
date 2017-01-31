@@ -1,17 +1,17 @@
 import json
 import bson
 import bottle
-from bottle import post, route, run, request, abort,template,response
+from bottle import post, route, run, request, abort,response
 from pymongo import Connection
 import pymongo
-from income_to import my_data_to_str, is_number
+#from income_to import my_data_to_str, is_number
 from bson.objectid import ObjectId
-import os
-import http.cookies
+#import os
+#import http.cookies
 import logging
 from cork import Cork
 from beaker.middleware import SessionMiddleware
-import datetime
+#import datetime
 
 class JSONEncoder(json.JSONEncoder):
     def default(self, o):
@@ -19,8 +19,14 @@ class JSONEncoder(json.JSONEncoder):
             return str(o)
         return json.JSONEncoder.default(self, o)
 
-connection = Connection('localhost', 27017)
-db = connection.mydatabase
+def is_number(str):
+    try:
+        float(str)
+        return True
+    except ValueError:
+        return False
+
+
 
 #--------------
 logging.basicConfig(format='localhost - - [%(asctime)s] %(message)s', level=logging.DEBUG)
@@ -278,7 +284,7 @@ def put_expenditure():
 #********************************************POST*************************************************        
 @route('/expenditure', method='POST')
 def post_expenditure():
-    aaa.require(fail_redirect='/sorry_page')
+    #aaa.require(fail_redirect='/sorry_page')
     lwist1=['_id_user','sum','category','note','data','customer']
     data = request.body.readline().decode('utf8')
     if not data:
@@ -426,8 +432,13 @@ def get_all_customer():
     my_data = db['customer'].find()
     if not my_data:
         abort(404, 'DB is empty')
-    s=my_data_to_str(my_data)
-    return s
+    l=[]
+    for i in my_data:
+        l.append(JSONEncoder().encode(i))
+    if not my_data:
+        abort(404, 'DB is empty')
+    return l
+
 
 #get customer for _id_user   
 @route('/customer/:id', method='GET')
@@ -435,12 +446,15 @@ def get_customer(id):
     print(id)
     try:
         my_data = db['customer'].find_one({'_id': ObjectId(id)})
+        #my_data = db['customer'].find({'customer':id})
     except bson.errors.BSONError:
         abort(400, '_id is wrong')
-    print(my_data)
+    l=[]
+    for i in my_data:
+        l.append(JSONEncoder().encode(i))
     if not my_data:
-        abort(404, 'No document with id %s' % id)
-    return JSONEncoder().encode(my_data)
+        abort(404, 'DB is empty')
+    return l
 #********************************************DELETE*************************************************    
 @route('/customer/:id', method='DELETE')
 def delete_customer(id):
@@ -457,7 +471,9 @@ def delete_customer_all():
     except:
         print ('error/exception')
     return my_data
-    
+
+connection = Connection('localhost', 27017)
+db = connection.mydatabase
 bottle.debug(True)
 run(app=app,host='localhost', port=8080,quiet=False)
 #application = bottle.default_app()
