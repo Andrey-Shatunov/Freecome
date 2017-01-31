@@ -161,7 +161,7 @@ def put_income():
 #********************************************POST*************************************************        
 @route('/income', method='POST')
 def post_income():
-    #aaa.require(fail_redirect='/sorry_page')
+    aaa.require(fail_redirect='/sorry_page')
     lwist1=['_id_user','sum','category','note','data','customer']
     data = request.body.readline().decode('utf8')
     print("------------------------")
@@ -199,7 +199,7 @@ def post_income():
 #********************************************GET*************************************************       
 @route('/income', method='GET')
 def get_all_income():
-    #aaa.require(fail_redirect='/sorry_page')
+    aaa.require(fail_redirect='/sorry_page')
     my_data = db['income'].find()
     l=[]
     for i in my_data:
@@ -211,7 +211,7 @@ def get_all_income():
 #get income for _id_user   
 @route('/income/:id', method='GET')
 def get_income(id):
-    #aaa.require(fail_redirect='/sorry_page')
+    aaa.require(fail_redirect='/sorry_page')
     print(id)
     try:
         my_data = db['income'].find_one({'_id': ObjectId(id)})
@@ -225,7 +225,7 @@ def get_income(id):
 #get user for id
 @route('/income/user/:id', method='GET')
 def get_income_for_user(id):
-    #aaa.require(fail_redirect='/sorry_page')
+    aaa.require(fail_redirect='/sorry_page')
     my_data = db['income'].find({'_id_user':id})
     l=[]
     for i in my_data:
@@ -284,7 +284,7 @@ def put_expenditure():
 #********************************************POST*************************************************        
 @route('/expenditure', method='POST')
 def post_expenditure():
-    #aaa.require(fail_redirect='/sorry_page')
+    aaa.require(fail_redirect='/sorry_page')
     lwist1=['_id_user','sum','category','note','data','customer']
     data = request.body.readline().decode('utf8')
     if not data:
@@ -316,6 +316,7 @@ def post_expenditure():
 #********************************************GET*************************************************       
 @route('/expenditure', method='GET')
 def get_all_expenditure():
+    aaa.require(fail_redirect='/sorry_page')
     my_data = db['expenditure'].find()
     l=[]
     for i in my_data:
@@ -327,6 +328,7 @@ def get_all_expenditure():
 #get expenditure for _id_user   
 @route('/expenditure/:id', method='GET')
 def get_expenditure(id):
+    aaa.require(fail_redirect='/sorry_page')
     print(id)
     try:
         my_data = db['expenditure'].find_one({'_id': ObjectId(id)})
@@ -340,6 +342,7 @@ def get_expenditure(id):
 #get user for id
 @route('/expenditure/user/:id', method='GET')
 def get_expenditure_for_user(id):
+    aaa.require(fail_redirect='/sorry_page')
     my_data = db['expenditure'].find({'_id_user':id})
     l=[]
     for i in my_data:
@@ -350,6 +353,7 @@ def get_expenditure_for_user(id):
 #********************************************DELETE*************************************************    
 @route('/expenditure/:id', method='DELETE')
 def delete_expenditure(id):
+    aaa.require(fail_redirect='/sorry_page')
     try:
         my_data = db['expenditure'].remove({'_id':ObjectId(id)})
     except bson.errors.BSONError:
@@ -358,6 +362,7 @@ def delete_expenditure(id):
  
 @route('/expenditure/all/', method='DELETE')
 def delete_expenditure_all():
+    aaa.require(fail_redirect='/sorry_page')
     try:
         my_data = db['expenditure'].remove({})
     except:
@@ -368,6 +373,7 @@ def delete_expenditure_all():
 #********************************************PUT_customer************************************************* 
 @route('/customer', method='PUT')
 def put_customer():
+    aaa.require(fail_redirect='/sorry_page')
     data = request.body.readline().decode('utf8')
     lwist1=['name']
     if not data:
@@ -405,6 +411,7 @@ def put_customer():
 #********************************************POST*************************************************        
 @route('/customer', method='POST')
 def post_customer():
+    aaa.require(fail_redirect='/sorry_page')
     data = request.body.readline().decode('utf8')
     if not data:
         abort(400, 'No data received')
@@ -429,6 +436,7 @@ def post_customer():
 #********************************************GET*************************************************       
 @route('/customer', method='GET')
 def get_all_customer():
+    aaa.require(fail_redirect='/sorry_page')
     my_data = db['customer'].find()
     if not my_data:
         abort(404, 'DB is empty')
@@ -443,6 +451,7 @@ def get_all_customer():
 #get customer for _id_user   
 @route('/customer/:id', method='GET')
 def get_customer(id):
+    aaa.require(fail_redirect='/sorry_page')
     print(id)
     try:
         my_data = db['customer'].find_one({'_id': ObjectId(id)})
@@ -458,6 +467,7 @@ def get_customer(id):
 #********************************************DELETE*************************************************    
 @route('/customer/:id', method='DELETE')
 def delete_customer(id):
+    aaa.require(fail_redirect='/sorry_page')
     try:
         my_data = db['customer'].remove({'_id':ObjectId(id)})
     except bson.errors.BSONError:
@@ -466,6 +476,7 @@ def delete_customer(id):
  
 @route('/customer/all/', method='DELETE')
 def delete_customer_all():
+    aaa.require(fail_redirect='/sorry_page')
     try:
         my_data = db['customer'].remove({})
     except:
