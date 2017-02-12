@@ -12,7 +12,7 @@ export default class Login extends React.Component {
 				<div className="row align-items-center justify-content-center" style={{"height": "100vh"}}>
 					<div className="col-4">
 						<div className="card">
-							<div className="card-header">Sign In to Freecome</div>
+							<h5 className="card-header">Sign in to Freecome</h5>
 							<div className="card-block">
 								<form action="">
 									<div className="form-group">
@@ -27,7 +27,7 @@ export default class Login extends React.Component {
 								</form>	
 							</div>
 							<div className="card-footer text-nowrap text-center">
-								New to Freecome? <a href="">Create an account</a>.
+								New to Freecome? <a href="/join">Create an account</a>.
 							</div>
 						</div>
 					</div>
