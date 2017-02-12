@@ -1,13 +1,14 @@
 const path = require('path');
+const webpack = require('webpack');
 
 module.exports = {
     devtool: 'source-map',
     entry: {
-        index: './src/js/app.js',
+        index: ['./src/js/app.js']
     },
     output: {
         path: path.join(__dirname, 'public/js/'),
-        filename: '[name].bundle.js',
+        filename: '[name].js',
     },
     module: {
         loaders: [{
@@ -23,9 +24,14 @@ module.exports = {
             loader: "style-loader!css-loader"
         }]
     },
+    plugins: [
+        new webpack.HotModuleReplacementPlugin()
+    ],
     devServer: {
         contentBase: path.join(__dirname, "public"),
         host: 'localhost',
-        port: 3310
+        port: 3310,
+        hot: true,
+        historyApiFallback: true
     }
 };
