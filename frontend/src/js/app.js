@@ -2,8 +2,9 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import Layout from './components/Layout'
 import HelloWorld from './components/HelloWorld'
-import Login from './components/Login.js'
-import Join from './components/Join.js'
+import Login from './components/Login'
+import Join from './components/Join'
+import Dashboard from './components/Dashboard'
 import store from './store'
 
 import { Router, Route, IndexRoute, browserHistory } from 'react-router'
@@ -14,8 +15,9 @@ const router = (
         <Router history={browserHistory}>
             <Route path="/" component={Layout}>
                 <IndexRoute component={HelloWorld} />
-                <Route path="/login" component={Login} />
-                <Route path="/join" component={Join} />
+                <Route path="login" component={Login} />
+                <Route path="join" component={Join} />
+                <Route path=":username" component={Dashboard} />
             </Route>
         </Router>
     </Provider>
