@@ -28,7 +28,7 @@
           <p><label>Role</label> <input type="text" name="role" /></p>
           <p><label>Level</label> <input type="text" name="level" /></p>
           <button type="submit" > OK </button>
-          <button type="button" class="close"> Cancel </button>
+          <button type="button" class="close"> Cancel </button> 
       </form>
       <br />
       <p>Delete role:</p>
