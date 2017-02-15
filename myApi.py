@@ -208,7 +208,7 @@ def get_all_income():
         abort(404, 'DB is empty')
     return l
 
-#get income for _id_user   
+#get income for _id   
 @route('/income/:id', method='GET')
 def get_income(id):
     aaa.require(fail_redirect='/sorry_page')
@@ -222,7 +222,7 @@ def get_income(id):
         abort(404, 'No document with id %s' % id)
     return JSONEncoder().encode(my_data)
 
-#get user for id
+#get user for id_user
 @route('/income/user/:id', method='GET')
 def get_income_for_user(id):
     aaa.require(fail_redirect='/sorry_page')
@@ -325,7 +325,7 @@ def get_all_expenditure():
         abort(404, 'DB is empty')
     return l
 
-#get expenditure for _id_user   
+#get expenditure for _id
 @route('/expenditure/:id', method='GET')
 def get_expenditure(id):
     aaa.require(fail_redirect='/sorry_page')
@@ -339,7 +339,7 @@ def get_expenditure(id):
         abort(404, 'No document with id %s' % id)
     return JSONEncoder().encode(my_data)
 
-#get user for id
+#get user for id_user
 @route('/expenditure/user/:id', method='GET')
 def get_expenditure_for_user(id):
     aaa.require(fail_redirect='/sorry_page')
@@ -375,7 +375,7 @@ def delete_expenditure_all():
 def put_customer():
     aaa.require(fail_redirect='/sorry_page')
     data = request.body.readline().decode('utf8')
-    lwist1=['name']
+    lwist1=['customer']
     if not data:
         abort(400, 'No data received')
     try:
@@ -395,6 +395,7 @@ def put_customer():
     #print(lwist1.count(list_key[0]))
 
     list_key.remove('_id')
+    print("list_key"+str(list_key))
     print("list_key"+str(list_key))
     if lwist1.count(list_key[0]) == 0:
         abort(400, 'Wrong parameter')
