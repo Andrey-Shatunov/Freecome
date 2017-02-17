@@ -51,7 +51,7 @@ bottle.debug(True)
     return mb
 
 mb = populate_mongodb_backend()'''
-mb = MongoDBBackend(db_name='qwe', initialize=True)
+mb = MongoDBBackend(db_name='users_system', initialize=True)
 aaa = Cork(backend=mb, email_sender='avsh_174@mail.ru', smtp_url='ssl://avsh_174@mail.ru:qwerty123456@smtp.mail.ru:465')
 
 # alias the authorization decorator with defaults
