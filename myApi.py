@@ -11,6 +11,7 @@ from bson.objectid import ObjectId
 import logging
 from cork import Cork
 from beaker.middleware import SessionMiddleware
+from cork.backends import MongoDBBackend
 #import datetime
 
 class JSONEncoder(json.JSONEncoder):
@@ -34,7 +35,24 @@ log = logging.getLogger(__name__)
 bottle.debug(True)
 
 # Use users.json and roles.json in the local example_conf directory
-aaa = Cork('conf', email_sender='avsh_174@mail.ru', smtp_url='ssl://avsh_174@mail.ru:qwerty123456@smtp.mail.ru:465')
+'''def populate_mongodb_backend():
+    mb = MongoDBBackend(db_name='users_system', initialize=True)
+    mb.users._coll.insert({
+        "login": "admin",
+        "email_addr": "admin@localhost.local",
+        "desc": "admin test user",
+        "role": "admin",
+        "hash": "cLzRnzbEwehP6ZzTREh3A4MXJyNo+TV8Hs4//EEbPbiDoo+dmNg22f2RJC282aSwgyWv/O6s3h42qrA6iHx8yfw=",
+        "creation_date": "2012-10-28 20:50:26.286723"
+    })
+    mb.roles._coll.insert({'role': 'admin', 'val': 100})
+    mb.roles._coll.insert({'role': 'editor', 'val': 60})
+    mb.roles._coll.insert({'role': 'user', 'val': 50})
+    return mb
+
+mb = populate_mongodb_backend()'''
+mb = MongoDBBackend(db_name='qwe', initialize=True)
+aaa = Cork(backend=mb, email_sender='avsh_174@mail.ru', smtp_url='ssl://avsh_174@mail.ru:qwerty123456@smtp.mail.ru:465')
 
 # alias the authorization decorator with defaults
 authorize = aaa.make_auth_decorator(fail_redirect="/login", role="user")
@@ -483,7 +501,12 @@ def delete_customer_all():
     except:
         print ('error/exception')
     return my_data
-
+    
+from bottle import static_file
+@route('/static/<filename>')
+def server_static(filename):
+    return static_file(filename, root='./frontend/public/')
+    
 connection = Connection('localhost', 27017)
 db = connection.mydatabase
 bottle.debug(True)
