@@ -4,15 +4,12 @@ import bottle
 from bottle import post, route, run, request, abort,response
 from pymongo import Connection
 import pymongo
-#from income_to import my_data_to_str, is_number
 from bson.objectid import ObjectId
-#import os
-#import http.cookies
 import logging
 from cork import Cork
 from beaker.middleware import SessionMiddleware
 from cork.backends import MongoDBBackend
-#import datetime
+from bottle import static_file
 
 class JSONEncoder(json.JSONEncoder):
     def default(self, o):
@@ -36,10 +33,10 @@ bottle.debug(True)
 
 # Use users.json and roles.json in the local example_conf directory
 '''def populate_mongodb_backend():
-    mb = MongoDBBackend(db_name='users_system', initialize=True)
+    mb = MongoDBBackend(db_name='users', initialize=True)
     mb.users._coll.insert({
         "login": "admin",
-        "email_addr": "admin@localhost.local",
+        "email_addr": "andreshatuno@gmail.com",
         "desc": "admin test user",
         "role": "admin",
         "hash": "cLzRnzbEwehP6ZzTREh3A4MXJyNo+TV8Hs4//EEbPbiDoo+dmNg22f2RJC282aSwgyWv/O6s3h42qrA6iHx8yfw=",
@@ -51,7 +48,7 @@ bottle.debug(True)
     return mb
 
 mb = populate_mongodb_backend()'''
-mb = MongoDBBackend(db_name='users_system', initialize=True)
+mb = MongoDBBackend(db_name='users', initialize=True)
 aaa = Cork(backend=mb, email_sender='avsh_174@mail.ru', smtp_url='ssl://avsh_174@mail.ru:qwerty123456@smtp.mail.ru:465')
 
 # alias the authorization decorator with defaults
@@ -125,26 +122,6 @@ def validate_registration(registration_code):
 def login_form():
     """Serve login form"""
     return {}
-#--------------
-
-
-@post("/user")
-def foo():
-    asd=request.forms.get("age")  # Получить содержимое одного поля age
-    print(asd)
-    print(request.get_cookie("name"))
-    print("------------------------")
-    print(str(request.headers['Host']))
-    for i in request.headers:
-        print(str(i))
-    print("------------------------")
-    d={}
-    d['name']=request.forms.get("name")
-    d['password']=request.forms.get("password")
-    db['users'].save(d)
-    response.set_cookie("name", "11111", secret='qwe')
-    print(response._cookies['name'])
-    return "Hello word"
 
 #********************************************PUT**********************************
 @route('/income', method='PUT')
@@ -502,7 +479,7 @@ def delete_customer_all():
         print ('error/exception')
     return my_data
     
-from bottle import static_file
+
 @route('/static/<filename>')
 def server_static(filename):
     return static_file(filename, root='./frontend/public/')
