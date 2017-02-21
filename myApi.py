@@ -116,13 +116,6 @@ def validate_registration(registration_code):
     aaa.validate_registration(registration_code)
     return 'Thanks. <a href="/login">Go to login</a>'
 
-    
-@bottle.route('/login')
-@bottle.view('login_form')
-def login_form():
-    """Serve login form"""
-    return {}
-
 #********************************************PUT**********************************
 @route('/income', method='PUT')
 def put_income():
@@ -482,8 +475,14 @@ def delete_customer_all():
 
 @route('/<filename>')
 def server_static(filename):
-    pathto = "/public/"+filename
-    return static_file(pathto, root='./frontend/')
+    return static_file("/public/"+filename, root='./frontend/')
+
+    
+@bottle.route('/login')
+@bottle.view('login_form')
+def login_form():
+    """Serve login form"""
+    return {}
     
 connection = Connection('localhost', 27017)
 db = connection.mydatabase
