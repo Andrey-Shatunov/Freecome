@@ -77,7 +77,10 @@ def post_get(name, default=''):
     print(bottle.request)
     return bottle.request.POST.get(name, default).strip()
 
-
+@route('/<:re:.*>')
+def server_static():
+    return static_file("/public/index.html", root='./frontend/')
+    
 @post('/login')
 def login():
     """Authenticate users"""
@@ -472,17 +475,12 @@ def delete_customer_all():
         print ('error/exception')
     return my_data
     
-
-@route('/<filename>')
-def server_static(filename):
-    return static_file("/public/"+filename, root='./frontend/')
-
     
 @bottle.route('/login')
 @bottle.view('login_form')
 def login_form():
-    """Serve login form"""
-    return {}
+   """Serve login form"""
+   return {}
     
 connection = Connection('localhost', 27017)
 db = connection.mydatabase
