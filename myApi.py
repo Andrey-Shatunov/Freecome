@@ -480,9 +480,10 @@ def delete_customer_all():
     return my_data
     
 
-@route('/static/<filename>')
+@route('/<filename>')
 def server_static(filename):
-    return static_file(filename, root='./frontend/public/')
+    pathto = "/public/"+filename
+    return static_file(pathto, root='./frontend/')
     
 connection = Connection('localhost', 27017)
 db = connection.mydatabase
